@@ -184,3 +184,64 @@ def calculate_local_assort(G, attribute):
     loc_ass = (per_pr * ((A.T * attribute).T * attribute )).sum(1) / degree
     #print(list(sorted(zip(np.round(d,2), G.nodes()))))
     return loc_ass
+
+
+def plot_network(G, a0 = None, values = None):
+    if values is None:
+        values = nx.degree_centrality(G).values()
+    
+    norm = mpl.colors.Normalize(vmin=min(values), vmax=max(values), clip=True)
+    mapper = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.coolwarm)
+
+
+    # NEtwork
+    if nx.is_bipartite(G):
+        top = [_ for _ in G.nodes() if _[0] != "S"]
+        pos = nx.bipartite_layout(G, top)
+        node_color = ["#e6af2e" if node in top else "#e0e2db" for node in G]
+    else:
+        pos = nx.spring_layout(G, seed = 1)
+        node_color = [mapper.to_rgba(i) for i in values]
+
+    nx.draw(G, pos = pos, with_labels = True, node_size=500*np.array(list(values)), edge_color = "darkgray", 
+           node_color = node_color, ax = a0)
+    
+    
+def plot_network_adj(G, values = None):
+    """
+    Plots the graph (with color/node size adjusted according to values) and the adjacency matrix
+    """
+    f, (a0, a1, a2) = plt.subplots(1, 3, gridspec_kw={'width_ratios': [1, 1, 0.5]}, figsize=(12,4))
+    
+    plot_network(G, a0, values = values)
+    
+    # Adjacency
+    df = nx.to_pandas_adjacency(G, nodelist=list(G.nodes()), dtype=int)
+    plot_table(a1, df.values, df.index, df.columns)
+
+    A = nx.to_scipy_sparse_array(G, nodelist=list(G.nodes()), weight=1)
+    N = len(G.nodes())
+    a2.spy(A)
+    sns.despine(bottom="True", left=True)
+    plt.grid(True)
+    #2add the right 
+    a2.set_xticks(range(N), G.nodes(), rotation=90)
+    a2.set_yticks(range(N), G.nodes())
+    plt.tight_layout()
+
+def plot_table(a1, cellText, rowLabels, colLabels):
+    cellText = pd.DataFrame(cellText)
+    the_table = a1.table(cellText=cellText.values, rowLabels=rowLabels, colLabels=colLabels, loc='center', colLoc = "left", cellColours=(cellText>0).replace({False: "white", True:"#e6af2e"}).values)
+    a1.axis(False) 
+    the_table.scale(0.8, 1.6)
+
+    
+def adj_to_net(A, d_names = {0: "Alice", 1: "Bob", 2: "John", 3:"Amy", 4:"Mike", 5:"Rose"}):
+    G = nx.from_numpy_array(A, create_using=nx.DiGraph())
+    G = nx.relabel_nodes(G, d_names)
+    return G
+
+def normalize_by_row(A):
+    S = 1/A.sum(axis=1)
+    Q = ss.csr_array(ss.spdiags(S.T, 0, *A.shape))
+    return (Q @ A)
