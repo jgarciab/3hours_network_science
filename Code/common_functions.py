@@ -2,7 +2,10 @@ import random
 import numpy as np
 import networkx as nx
 import scipy.sparse as ss
-
+import pylab as plt
+import matplotlib as mpl
+import pandas as pd
+import seaborn as sns
 
 def random_conf(degree_seq, fun, correct):
     """

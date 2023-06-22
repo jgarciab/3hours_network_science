@@ -15,4 +15,5 @@ dependencies:
   - pycairo
   - cairocffi
   - polars
+  - pyarrow
 prefix: /Users/garci061/miniforge3/envs/networks
