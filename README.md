@@ -14,6 +14,9 @@ Code:
 
 
 ### How to run the code
+Online: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jgarciab/3hours_network_science/HEAD)
+
+or
 1. Install anaconda/miniconda
 2. Install dependencies and start jupyter notebook
 
